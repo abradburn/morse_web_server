@@ -1,0 +1,54 @@
+*{
+
+}
+
+html{
+
+}
+
+td{
+}
+
+body{
+font-family:'Open Sans', sans-serif;
+}
+
+table{
+	width:100%;
+}
+
+.percent::after{
+	content:"%";
+}
+
+#selector{
+	width:80%;
+	margin:0px auto;
+	padding:40px;
+	padding-top:60px;
+}
+
+.input{
+	height:2.5em;
+	font-weight:normal;
+}
+
+.minimal{
+	margin:0;
+	border:0;
+	background-color:#FFF;
+	border-bottom:1px solid black;
+	margin-right:.5em;
+}
+
+#selector select{
+
+}
+
+#selector input[type=date]{
+
+}
+
+#selector input[type=submit]{
+
+}

@@ -1,0 +1,52 @@
+#mask{
+	position:absolute;
+	z-index:9000;
+	background-color:#000;
+	display:none;
+}
+
+#more_info .window{
+	position:fixed;
+	display:none;
+	z-index:9999;
+	padding:20px;
+
+	background-color:#FFF;
+	border:5px solid #AAA;
+}
+
+#dialog{
+
+}
+
+#chart{
+	width:600px;
+	height:400px;
+}
+
+.window table{
+	text-align:center;
+}
+
+.window table tr{
+	border-bottom:1px solid black;
+}
+
+.window table tr:nth-child(odd){
+	background-color:#DDD;
+}
+
+.window table tr.header{
+	font-size:1.5em;
+	margin-bottom:.5em;
+	border-top:1px solid black;
+	background-color:#FFF;
+}
+
+.window table tr td{
+	padding:.1em .6em .1em .6em;
+}
+
+.window table tr td:first-child{
+	text-align:left;
+}
