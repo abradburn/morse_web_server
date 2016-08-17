@@ -1,0 +1,76 @@
+<?php if(!defined('ENVIRONMENT')){ exit('No direct script access allowed'); }
+class _authenticate{
+
+	private $input;
+
+	private $db_r;
+
+	private $db_w;
+
+	public function __construct(){
+		$this->input =& _load_class('input');
+
+		$this->db_r =& _load_model('users_aic', 'read');
+
+                $this->db_w =& _load_model('users_aic', 'write');
+	}
+
+	public function _authenticate_user(){
+		$token = $this->db_r -> mysqliEscape($this->input -> _secured(array('token' => 'string')));
+
+		if($this->_authenticate_session()){
+			return TRUE;
+		}
+
+                $alias = $this->db_r -> mysqliEscape($this->input -> _secured(array('user_name' => 'string')));
+                $password = $this->input -> _secured(array('password' => 'md5'));
+
+		if(!$alias || !$password){
+			return FALSE;
+		}
+
+                $query = "SELECT uID FROM credentials WHERE alias = \"$alias\" AND password = \"$password\";";
+
+                if(!$uID = $this->db_r -> mysqliQuery("SELECT uID FROM credentials WHERE alias = \"$alias\" AND password = \"$password\";")){
+                        return FALSE;
+                }
+
+		require_once SYSPATH.'helper/token.php';
+
+                $token = token(20);
+                $md5 = md5($token.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
+                $time = time() + 3600;
+
+		setcookie('user', $uID, $time, '/', HOST);
+                setcookie('token', $token, $time, '/', HOST);
+
+                $query = "INSERT INTO session (uID, md5, timestamp) VALUES (\"{$uID}\", \"{$md5}\", $time);";
+
+                if($this->db_w -> mysqliQuery($query)){
+			return TRUE;
+                }
+	}
+
+	public function _authenticate_session(){
+		$token = $this->db_r -> mysqliEscape($this->input -> _secured(array('token' => 'string')));
+
+		if(!$token){
+			return FALSE;
+		}
+
+                $md5 = md5($token.$_SERVER['HTTP_USER_AGENT'].$_SERVER['REMOTE_ADDR']);
+                $time = time();
+
+		if($uID = $this->db_r -> mysqliQuery("SELECT uID FROM session WHERE md5 = \"{$md5}\" AND timestamp >= {$time};")){
+			$time = time() + 3600;
+			$this->db_w -> mysqliQuery("UPDATE session SET timestamp = {$time} WHERE md5 = \"{$md5}\";");
+			setcookie('token', $token, $time, '/', HOST);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+
+}
+?>

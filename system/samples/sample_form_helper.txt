@@ -1,0 +1,187 @@
+<?php if(!defined('ENVIRONMENT')){ exit('No direct script access allowed'); }
+class _form{
+
+	private $form = array(
+		'action' => '',
+		'method' => '',
+		'inputs' => array(),
+	);
+
+	private $error;
+
+	public function __construct($action = '', $method = 'post', $secure = TRUE, $error = NULL){
+		if($action === ''){
+			$action = SITEURI.'index.php';
+		}
+
+		$this->form['action'] = $action;
+		$this->form['method'] = $method;
+
+		$this->error = $error;
+
+		if($secure){
+			$this->_hidden_field('f_token', RTOKEN);
+		}
+	}
+
+	public function __deconstruct(){
+
+	}
+
+	public function _hidden_field($name = '', $value = ''){
+		$input;
+
+		$input .= "<input type=\"hidden\" name=\"{$name}\" value=\"{$value}\" />\n";
+
+		$this->form['inputs'][] = $input;
+	}
+
+	public function _select_field($label = '', $name = '', $options = '', $selected = '', $required = FALSE){
+		$id = str_replace(array('[', ']'), '', $name);
+
+		$input;
+
+		if(is_array($this->error) && in_array($name, $this->error)){
+		}
+		else{
+		}
+
+		if($label){
+			$input .= "<label for=\"{$id}\">{$label}</label>\n";
+		}
+
+		$input .= "<select id=\"{$id}\" name=\"{$name}\">\n";
+		if(is_array($options)){
+			foreach($options as $key => $value){
+				if($key === $selected){
+					$input .= "<option value=\"{$key}\" selected>{$value}</option>\n";
+				}else{
+					$input .= "<option value=\"{$key}\">{$value}</option>\n";
+				}
+			}
+		}
+		else{
+
+		}
+
+		$input .= "</select>\n";
+
+
+		$this->form['inputs'][] = $input;
+	}
+
+	public function _text_field($label = '', $name = '', $value = '', $placeholder = '...', $required = FALSE){
+		$id = str_replace(array('[', ']'), '', $name);
+
+		$input;
+
+		if(is_array($this->error) && in_array($name, $this->error)){
+		}
+		else{
+		}
+
+		if($label){
+			$input .= "<label for=\"{$id}\">{$label}</label>\n";
+		}
+
+		$input .= "<input type=\"text\" id=\"{$id}\" name=\"{$name}\" value=\"{$value}\" placeholder=\"{$placeholder}\"";
+		if($required){
+			$input .= " required";
+		}
+		$input .= " />\n";
+
+
+		$this->form['inputs'][] = $input;
+	}
+
+	public function _password_field($label = '', $name = '', $value = '', $placeholder = '...', $required = FALSE){
+		$id = str_replace(array('[', ']'), '', $name);
+
+		$input;
+
+		if(is_array($this->error) && in_array($name, $this->error)){
+		}
+		else{
+		}
+
+		if($label){
+			$input .= "<label for=\"{$id}\">{$label}</label>\n";
+		}
+
+		$input .= "<input type=\"password\" id=\"{$id}\" name=\"{$name}\" value=\"{$value}\" placeholder=\"{$placeholder}\"";
+		if($required){
+			$input .= " required";
+		}
+		$input .= " />\n";
+
+
+		$this->form['inputs'][] = $input;
+	}
+
+	public function _textarea_field($label = '', $name = '', $value = '', $rows = 5, $cols = 20, $required = FALSE){
+		$id = str_replace(array('[', ']'), '', $name);
+
+		$input;
+
+		if(is_array($this->error) && in_array($name, $this->error)){
+		}
+		else{
+		}
+
+		if($label){
+			$input .= "<label for=\"{$id}\">{$label}</label>\n";
+		}
+
+		$input .= "<textarea id=\"{$id}\" name=\"{$name}\" rows=\"{$rows}\" cols=\"{$cols}\"";
+		if($required){
+			$input .= " required";
+		}
+		$input .= ">\n";
+		$input .= $value;
+		$input .= "</textarea>\n";
+
+
+		$this->form['inputs'][] = $input;
+	}
+
+	public function _submit($name = NULL, $value = NULL, $id = NULL){
+		$id = str_replace(array('[', ']'), '', $id);
+
+		$input;
+
+
+
+		$input .= "<input type=\"submit\" id=\"{$id}\"";
+		if($name){
+			$input .= " name=\"{$name}\"";
+		}
+		$input .= " value=\"{$value}\" />\n";
+
+
+		$this->form['inputs'][] = $input;
+	}
+
+	public function _title($title = ''){
+		  if($title == NULL){
+					 return;
+		  }
+
+		  $input;
+
+		  $input .= "<p>{$title}</p>\n";
+
+		  $this->form['inputs'][] = $input;
+	}
+
+	public function _display(){
+		echo "<form action=\"{$this->form['action']}\" method=\"{$this->form['method']}\">\n";
+		echo "<fieldset>\n";
+		foreach($this->form['inputs'] as $value){
+			echo $value;
+		}
+		echo "</fieldset>\n";
+		echo "</form>\n";
+	}
+
+}
+?>

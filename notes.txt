@@ -1,0 +1,2 @@
+Cron Job:
+* * * * * php -f /var/www/morse_project/public/index.php class=index method=cron

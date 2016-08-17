@@ -1,0 +1,94 @@
+<?php
+
+function token($length = 10, $type = 'a'){
+	if($length <= 0 || $length === ''){
+		return;
+	}
+
+	switch(strtolower($type)){
+		case 'a': $min = 0; $max = 61; break;
+		case 'ln': $min = 26; $max = 61; break;
+		case 'un': $min = 26; $max = 61; break;
+		case 'ul': $min = 0; $max = 51; break;
+	}
+
+	$token;
+
+	for($i = 1; $i <= $length; $i++){
+		$int = mt_rand($min, $max);
+
+		switch($int){
+			case 0: $token .= 'A'; break;
+			case 1: $token .= 'B'; break;
+			case 2: $token .= 'C'; break;
+			case 3: $token .= 'D'; break;
+			case 4: $token .= 'E'; break;
+			case 5: $token .= 'F'; break;
+			case 6: $token .= 'G'; break;
+			case 7: $token .= 'H'; break;
+			case 8: $token .= 'I'; break;
+			case 9: $token .= 'J'; break;
+			case 10: $token .= 'K'; break;
+			case 11: $token .= 'L'; break;
+			case 12: $token .= 'M'; break;
+			case 13: $token .= 'N'; break;
+			case 14: $token .= 'O'; break;
+			case 15: $token .= 'P'; break;
+			case 16: $token .= 'Q'; break;
+			case 17: $token .= 'R'; break;
+			case 18: $token .= 'S'; break;
+			case 19: $token .= 'T'; break;
+			case 20: $token .= 'U'; break;
+			case 21: $token .= 'V'; break;
+			case 22: $token .= 'W'; break;
+			case 23: $token .= 'X'; break;
+			case 24: $token .= 'Y'; break;
+			case 25: $token .= 'Z'; break;
+
+			case 26: $token .= 'a'; break;
+			case 27: $token .= 'b'; break;
+			case 28: $token .= 'c'; break;
+			case 29: $token .= 'd'; break;
+			case 30: $token .= 'e'; break;
+			case 31: $token .= 'f'; break;
+			case 32: $token .= 'g'; break;
+			case 33: $token .= 'h'; break;
+			case 34: $token .= 'i'; break;
+			case 35: $token .= 'j'; break;
+			case 36: $token .= 'k'; break;
+			case 37: $token .= 'l'; break;
+			case 38: $token .= 'm'; break;
+			case 39: $token .= 'n'; break;
+			case 40: $token .= 'o'; break;
+			case 41: $token .= 'p'; break;
+			case 42: $token .= 'q'; break;
+			case 43: $token .= 'r'; break;
+			case 44: $token .= 's'; break;
+			case 45: $token .= 't'; break;
+			case 46: $token .= 'u'; break;
+			case 47: $token .= 'v'; break;
+			case 48: $token .= 'w'; break;
+			case 49: $token .= 'x'; break;
+			case 50: $token .= 'y'; break;
+			case 51: $token .= 'z'; break;
+
+			case 52: $token .= '0'; break;
+			case 53: $token .= '1'; break;
+			case 54: $token .= '2'; break;
+			case 55: $token .= '3'; break;
+			case 56: $token .= '4'; break;
+			case 57: $token .= '5'; break;
+			case 58: $token .= '6'; break;
+			case 59: $token .= '7'; break;
+			case 60: $token .= '8'; break;
+			case 61: $token .= '9'; break;
+		}
+	}
+
+	if($type === 'un'){
+		$token = strtoupper($token);
+	}
+
+	return $token;
+}
+?>

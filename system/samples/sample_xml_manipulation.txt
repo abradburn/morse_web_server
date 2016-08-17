@@ -1,0 +1,242 @@
+	private $db_w;
+
+	private $relationship;
+
+	private $application;
+
+	public function __construct(){
+		parent::__construct();
+
+		$this->db_w = _load_model('inventory_ocls', 'write');
+
+		$this->relationship = array();
+
+		$a_query = 'SELECT `dbo_a_application`.`application_id` AS `key`, `dbo_a_application`.`name_md5` AS `value` FROM `dbo_a_application`;';
+		$a_result = $this->db_w -> mysqliQuery($a_query);
+		$this->application = $this->_result_to_array($a_result);
+
+	}
+
+	public function index(){
+
+	}
+
+	public function split_file(){
+		if(!CLINPUT){
+			return;
+		}else{
+			echo "Script initiated.\n";
+		}
+
+		  // Node is a required, user specified value that represents the xml tag used within the file to distinguish records.
+		  // Without a defenition for node, we will not know what tag to use as a basis for splitting the file.
+		if($this->INPUT -> _defined('node')){
+			$node = $this->INPUT -> _secured(array('node' => 'string'));
+			echo "A data node of {$node} will be used as a basis for splitting the file.\n";
+		}else{
+			echo "Please supply a defenition for a data node type in the form 'node=[example]'.\n";
+			return;
+		}
+
+		  // Count is a user specified override for the number of records to be put into each file.
+		if($this->INPUT -> _defined('count')){
+			$count = $this->INPUT -> _secured(array('count' => 'int'));
+			echo "A user defined count of {$count} data nodes will be put into each file.\n";
+		}else{
+			echo "If you wish to alter the default number of nodes per file, please supply a number in the for 'count=[number]'.\n";
+		}
+
+		$file_path = APPPATH.'uploads/dbo_application/';
+		$file_name = 'dbo_application.xml';
+		$source_path = $file_path.$file_name;
+		if(!file_exists($source_path)){
+			echo "There is no file in the {$file_path} directory.  The script cannot continue.\n";
+			return;
+		}
+
+		if(!is_readable($source_path)){
+			echo "The file is not readable.\n";
+			return;
+		}
+
+		$source = fopen($source_path, 'r');
+		if(!$source){
+			echo "There was an unexpected error while attempting to open the file.\n";
+			return;
+		}else{
+			echo "The file has been opened.\n";
+		}
+
+		$split_path = $file_path.'split/';
+		if(!file_exists($split_path)){
+			echo "The destination directory for split files does not exist.\n";
+			return;
+		}else{
+			echo "The directory for split files exists.\n";
+		}
+
+		$this->_split_file($source, $node, $count, $split_path);
+
+		$new_name = 'old_'.$file_name;
+		$new_path = $file_path.$new_name;
+		rename($source_path, $new_path);
+
+		echo "Script terminated.\n";
+	}
+
+	private function _head(&$source = NULL, &$unit = NULL){
+		if($source === NULL || $unit === NULL){
+			return;
+		}
+
+		$head = array();
+
+		$done = FALSE;
+
+		fseek($source, 0);
+
+		while(!$done){
+			$raw = (string) fgets($source);
+			$string = trim(preg_replace(array('/</', '/>/'), '', $raw));
+			if(stripos($string, $unit) === 0){
+				$done = TRUE;
+				continue;
+			}
+			array_push($head, $raw);
+		}
+
+		foreach($head as $key => $value){
+			$return[$key] = $this->_stripInvalidXml($value);
+		}
+
+		return $return;
+	}
+
+	private function _tail(&$source = NULL, &$unit = NULL){
+		if($source === NULL || $unit === NULL){
+			return;
+		}
+
+		$tail = array();
+
+		$done = FALSE;
+	
+		$pointer = fseek($source, 0, SEEK_END);
+
+		while(!$done){
+			$char = fgetc($source);
+			if($char === "\n"){
+				$raw = (string) fgets($source);
+				$string = trim(preg_replace(array('/<\//', '/>/'), '', $raw));
+				if(stripos($string, $unit) === 0){
+					$done = TRUE;
+					continue;
+				}
+				array_unshift($tail, $raw);
+			}else{
+
+			}
+			fseek($source, $pointer--, SEEK_END);
+		}
+
+		foreach($tail as $key => $value){
+			$return[$key] = $this->_stripInvalidXml($value);
+		}
+
+		return $return;
+	}
+
+	private function _stripInvalidXml($value){
+		$ret = "";
+		$current;
+		if (empty($value)) 
+		{
+			return $ret;
+		}
+
+		$length = strlen($value);
+		for ($i=0; $i < $length; $i++)
+		{
+			$current = ord($value{$i});
+			if (($current == 0x9) ||
+				($current == 0xA) ||
+				($current == 0xD) ||
+				(($current >= 0x20) && ($current <= 0xD7FF)) ||
+				(($current >= 0xE000) && ($current <= 0xFFFD)) ||
+				(($current >= 0x10000) && ($current <= 0x10FFFF)))
+			{
+				$ret .= chr($current);
+			}
+			else
+			{
+				$ret .= " ";
+			}
+		}
+		return $ret;
+	}
+
+	private function _split_file(&$source = NULL, &$unit = NULL, &$limit = NULL, $split_path){
+		if($source === NULL || $unit === NULL){
+			return;
+		}
+
+		if($limit === NULL || !$limit || $limit < 1){
+			$limit = 1000;
+		}
+
+		$head = $this->_head($source, $unit);
+
+		$tail = $this->_tail($source, $unit);
+
+		fseek($source, 0);
+
+		$opening_tag = '<'.$unit;
+		$closing_tag = '</'.$unit;
+
+		$file_i = 1;
+		while($raw = fgets($source)){
+			if(stripos($raw, $opening_tag) === 0){
+				$node = TRUE;
+
+				if(!isset($output)){
+					$i = 0;
+					$file_name = $split_path."temp_".$file_i.".xml";
+					$output = fopen($file_name, 'w');
+					foreach($head as $value){
+						fwrite($output, $value);
+					}
+				}
+			}
+
+			if($node){
+				$raw = $this->_stripInvalidXml($raw);
+				if($output){
+					fwrite($output, $raw);
+				}
+			}
+
+			if(stripos($raw, $closing_tag) === 0){
+				$node = FALSE;
+				$i++;
+				if($i >= $limit){
+					foreach($tail as $value){
+						fwrite($output, $value);
+					}
+					fclose($output);
+					unset($output);
+					$file_i++;
+					echo ".";
+				}
+			}
+		}
+
+		if(isset($output)){
+			foreach($tail as $value){
+				fwrite($output, $value);
+			}
+			fclose($output);
+			unset($output);
+		}
+
+		echo "File splitting complete.\n";
+	}
