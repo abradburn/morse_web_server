@@ -1,0 +1,74 @@
+<?php
+if(!defined('BASEPATH')){exit('No direct script access allowed.');}
+class _test{
+	protected $connection;
+
+	protected $host = 'localhost';
+	protected $database = 'test';
+	protected $port = '';
+
+	protected $read = array(
+		'username' => 'test',
+		'password' => 'test'
+	);
+
+	protected $write = array(
+		'username' => 'test',
+		'password' => 'test'
+	);
+	
+	public function __construct(){
+
+	}
+
+	public function __destruct(){
+		if(isset($connection)){
+			$this->connection -> close();
+		}
+	}
+
+	public function _init_dep(){
+
+	}
+
+	public function _connect(&$destination = NULL, $mode){
+		if(!isset($destination)){
+			trigger_error('', E_USER_NOTICE);
+			return FALSE;
+		}
+
+		$mode = strtolower($mode);
+
+		if($mode !== 'read' && $mode !== 'write'){
+			trigger_error('', E_USER_NOTICE);
+			return FALSE;
+		}
+
+		if(isset($this->connection[$mode])){
+			$destination = $this->connection[$mode];
+			return TRUE;
+		}
+
+		$this->connection[$mode] = &$destination;
+
+		$username;
+		$password;
+
+		if($mode === 'read'){
+			$username = $this->read['username'];
+			$password = $this->read['password'];
+		}elseif($mode === 'write'){
+			$username = $this->write['username'];
+			$password = $this->write['password'];
+		}
+
+		if(!$this->connection[$mode] = pg_connect("host={$host} port={$port} dbname={$database} user={$username} password={$password}")){
+			trigger_error('Failed to connect to the specified database.', E_USER_ERROR);
+			return FALSE;
+		}
+
+		return TRUE;
+	}
+
+}
+?>
